@@ -1,106 +1,223 @@
 
 const API_KEY = "dbe9ofpr01qm2ls014ggdbe9ofpr01qm2ls014h0";
 
+const API_BASE = "https://finnhub.io/api/v1";
 const symbols = ["PLTR", "MU"];
 
-function formatUSD(value) {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    return "-";
-  }
+let selectedSymbol = "PLTR";
+let selectedRange = "5";
+let candleSeries = null;
+let chart = null;
 
-  return value.toLocaleString("en-US", {
+const $ = (id) => document.getElementById(id);
+
+function formatUSD(value) {
+  return Number(value).toLocaleString("en-US", {
     style: "currency",
     currency: "USD"
   });
 }
 
-async function loadOneStock(symbol) {
-  const response = await fetch(
-    `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`
-  );
-
-  if (!response.ok) {
-    throw new Error("Gagal mengambil data " + symbol);
-  }
-
-  const data = await response.json();
-
-  if (
-    !Number.isFinite(data.c) ||
-    data.c <= 0 ||
-    !Number.isFinite(data.pc) ||
-    data.pc <= 0
-  ) {
-    throw new Error("Data harga " + symbol + " tidak tersedia");
-  }
-
-  document.getElementById(`price-${symbol}`).textContent =
-    formatUSD(data.c);
-
-  const change = data.c - data.pc;
-  const percent = (change / data.pc) * 100;
-  const changeElement = document.getElementById(`change-${symbol}`);
-
-  changeElement.textContent =
-    `${change >= 0 ? "+" : ""}${formatUSD(change)} ` +
-    `(${percent >= 0 ? "+" : ""}${percent.toFixed(2)}%) dibanding penutupan sebelumnya`;
-
-  changeElement.className =
-    "change " + (change >= 0 ? "up" : "down");
-
-  document.getElementById(`open-${symbol}`).textContent =
-    formatUSD(data.o);
-
-  document.getElementById(`high-${symbol}`).textContent =
-    formatUSD(data.h);
-
-  document.getElementById(`low-${symbol}`).textContent =
-    formatUSD(data.l);
-
-  document.getElementById(`prev-${symbol}`).textContent =
-    formatUSD(data.pc);
+function setStatus(message) {
+  $("chart-status").textContent = message;
 }
 
-async function loadStocks() {
-  const button = document.getElementById("refreshButton");
-  button.disabled = true;
-  button.textContent = "MEMUAT DATA...";
+async function getJSON(url) {
+  const response = await fetch(url);
 
+  if (!response.ok) {
+    throw new Error("API gagal: " + response.status);
+  }
+
+  return response.json();
+}
+
+async function loadQuote(symbol) {
   try {
-    if (!API_KEY || API_KEY === "MASUKKAN_API_KEY_KAMU") {
-      throw new Error("Masukkan API key Finnhub terlebih dahulu.");
+    if (API_KEY.includes("MASUKKAN_API_KEY")) {
+      throw new Error("Masukkan API Key Finnhub di script.js.");
     }
 
-    const results = await Promise.allSettled(
-      symbols.map(symbol => loadOneStock(symbol))
+    const data = await getJSON(
+      `${API_BASE}/quote?symbol=${symbol}&token=${API_KEY}`
     );
 
-    const failed = results.filter(
-      result => result.status === "rejected"
-    );
+    if (!data || !data.c) {
+      throw new Error("Data harga belum tersedia.");
+    }
 
-    if (failed.length > 0) {
+    const price = data.c;
+    const change = data.d ?? 0;
+    const percent = data.dp ?? 0;
+    const prefix = change > 0 ? "+" : "";
+
+    $(`${symbol.toLowerCase()}-price`).textContent = formatUSD(price);
+
+    const changeElement = $(`${symbol.toLowerCase()}-change`);
+    changeElement.textContent =
+      `${prefix}${formatUSD(change)} (${prefix}${percent.toFixed(2)}%)`;
+
+    changeElement.className =
+      "change " + (change >= 0 ? "positive" : "negative");
+
+    $(`${symbol.toLowerCase()}-updated`).textContent =
+      data.t
+        ? "Waktu data: " + new Date(data.t * 1000).toLocaleString()
+        : "Harga saham USD";
+  } catch (error) {
+    $(`${symbol.toLowerCase()}-price`).textContent = "--";
+    $(`${symbol.toLowerCase()}-change`).textContent = error.message;
+    $(`${symbol.toLowerCase()}-change`).className = "change negative";
+  }
+}
+
+function createChart() {
+  const container = $("chart");
+
+  if (!window.LightweightCharts) {
+    setStatus("Library grafik gagal dimuat. Periksa koneksi internet.");
+    return;
+  }
+
+  chart = LightweightCharts.createChart(container, {
+    width: container.clientWidth,
+    height: container.clientHeight,
+    layout: {
+      background: { color: "rgba(9, 15, 29, 0)" },
+      textColor: "#d5deed"
+    },
+    grid: {
+      vertLines: { color: "rgba(150, 170, 200, 0.10)" },
+      horzLines: { color: "rgba(150, 170, 200, 0.10)" }
+    },
+    rightPriceScale: {
+      borderColor: "#354158"
+    },
+    timeScale: {
+      borderColor: "#354158",
+      timeVisible: true,
+      secondsVisible: false
+    },
+    crosshair: {
+      vertLine: { color: "#ff8c24" },
+      horzLine: { color: "#ff8c24" }
+    }
+  });
+
+  candleSeries = chart.addSeries(
+    LightweightCharts.CandlestickSeries,
+    {
+      upColor: "#21d99b",
+      downColor: "#ff5268",
+      borderUpColor: "#21d99b",
+      borderDownColor: "#ff5268",
+      wickUpColor: "#21d99b",
+      wickDownColor: "#ff5268"
+    }
+  );
+
+  const resizeObserver = new ResizeObserver(() => {
+    if (chart) {
+      chart.applyOptions({
+        width: container.clientWidth,
+        height: container.clientHeight
+      });
+    }
+  });
+
+  resizeObserver.observe(container);
+}
+
+function getCandleParams(range) {
+  const now = Math.floor(Date.now() / 1000);
+  let resolution = range;
+  let seconds = 60 * 60 * 24;
+
+  if (range === "5") seconds = 60 * 60 * 24 * 5;
+  if (range === "15") seconds = 60 * 60 * 24 * 10;
+  if (range === "60") seconds = 60 * 60 * 24 * 30;
+  if (range === "D") seconds = 60 * 60 * 24 * 365;
+  if (range === "W") {
+    resolution = "W";
+    seconds = 60 * 60 * 24 * 365 * 5;
+  }
+
+  return {
+    resolution,
+    from: now - seconds,
+    to: now
+  };
+}
+
+async function loadCandles() {
+  if (!candleSeries) return;
+
+  if (API_KEY.includes("MASUKKAN_API_KEY")) {
+    setStatus("Masukkan API Key Finnhub di script.js untuk memuat grafik.");
+    return;
+  }
+
+  setStatus(`Memuat grafik ${selectedSymbol}...`);
+
+  try {
+    const params = getCandleParams(selectedRange);
+
+    const url =
+      `${API_BASE}/stock/candle?symbol=${selectedSymbol}` +
+      `&resolution=${params.resolution}` +
+      `&from=${params.from}&to=${params.to}&token=${API_KEY}`;
+
+    const data = await getJSON(url);
+
+    if (data.s !== "ok" || !data.t?.length) {
       throw new Error(
-        "Sebagian data gagal dimuat. Periksa API key, koneksi, atau batas API."
+        "Data candlestick tidak tersedia. Periksa API Key, paket data, atau jam perdagangan."
       );
     }
 
-    document.getElementById("updateTime").textContent =
-      "Pembaruan: " +
-      new Date().toLocaleTimeString("id-ID");
-  } catch (error) {
-    document.getElementById("updateTime").textContent =
-      "Data gagal dimuat";
+    const candles = data.t.map((time, i) => ({
+      time,
+      open: data.o[i],
+      high: data.h[i],
+      low: data.l[i],
+      close: data.c[i]
+    }));
 
-    console.error(error);
-    alert(error.message);
-  } finally {
-    button.disabled = false;
-    button.textContent = "↻ PERBARUI HARGA";
+    candleSeries.setData(candles);
+    chart.timeScale().fitContent();
+    setStatus(`Grafik ${selectedSymbol} berhasil dimuat.`);
+  } catch (error) {
+    setStatus(error.message);
   }
 }
 
-loadStocks();
+$("symbol").addEventListener("change", (event) => {
+  selectedSymbol = event.target.value;
+  loadCandles();
+});
 
-// Coba memperbarui data setiap 60 detik.
-setInterval(loadStocks, 60000);
+document.querySelectorAll("[data-range]").forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedRange = button.dataset.range;
+
+    document.querySelectorAll("[data-range]").forEach((item) => {
+      item.classList.toggle("active", item === button);
+    });
+
+    loadCandles();
+  });
+});
+
+async function refreshQuotes() {
+  for (const symbol of symbols) {
+    await loadQuote(symbol);
+  }
+}
+
+createChart();
+refreshQuotes();
+loadCandles();
+
+// Pembaruan berkala; tidak menjamin harga tick-by-tick.
+setInterval(refreshQuotes, 60000);
+setInterval(loadCandles, 60000);
