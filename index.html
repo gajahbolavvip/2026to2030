@@ -4,79 +4,900 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Boruto Stock Portfolio</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="overlay"></div>
+  <title>BORUTO STOCK | PLTR & MU</title>
 
-  <header class="navbar">
-    <h2>⚡ BORUTO <span>STOCK</span></h2>
-    <div class="status">● STOCK MARKET</div>
-  </header>
+  <!-- ================= CSS ================= -->
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0b0e16;
+      --panel: rgba(15, 20, 34, 0.96);
+      --border: #30384a;
+      --text: #f5f7ff;
+      --muted: #a6b0c4;
+      --orange: #ff8b24;
+      --blue: #59a9ff;
+      --green: #45e6a0;
+      --red: #ff6878;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--bg);
+
+      /* Gambar Boruto tetap digunakan */
+      background-image:
+        linear-gradient(
+          rgba(7, 10, 18, 0.76),
+          rgba(7, 10, 18, 0.88)
+        ),
+        url("images/boruto.jpg");
+
+      background-size: cover;
+      background-position: center top;
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button, select {
+      font: inherit;
+    }
+
+    .navbar {
+      min-height: 60px;
+      padding: 16px 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      background: rgba(8, 11, 19, 0.88);
+    }
+
+    .brand {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .brand span {
+      color: var(--orange);
+    }
+
+    .market-status {
+      color: var(--green);
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .container {
+      width: min(1120px, 92%);
+      margin: 42px auto;
+    }
+
+    .hero {
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      color: var(--orange);
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      margin-bottom: 10px;
+    }
+
+    .hero h1 {
+      font-size: clamp(30px, 5vw, 48px);
+      line-height: 1.1;
+      margin-bottom: 14px;
+    }
+
+    .hero h1 span {
+      color: var(--orange);
+    }
+
+    .hero p {
+      color: #c2c9d8;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .section-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .stock-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .stock-card {
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--panel);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.25);
+      backdrop-filter: blur(12px);
+      min-width: 0;
+    }
+
+    .stock-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .ticker-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--orange);
+      border-radius: 10px;
+      background: rgba(255,139,36,0.12);
+      color: var(--orange);
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .ticker-icon.mu {
+      color: var(--blue);
+      border-color: var(--blue);
+      background: rgba(89,169,255,0.12);
+    }
+
+    .stock-title h2 {
+      font-size: 21px;
+      margin-bottom: 5px;
+    }
+
+    .stock-title p {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .price-label {
+      color: var(--orange);
+      font-size: 11px;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .price {
+      font-size: clamp(28px, 4vw, 36px);
+      font-weight: 800;
+      overflow-wrap: anywhere;
+      margin-bottom: 10px;
+    }
+
+    .change {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 22px;
+    }
+
+    .positive {
+      color: var(--green);
+    }
+
+    .negative {
+      color: var(--red);
+    }
+
+    .neutral {
+      color: var(--muted);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px 12px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 7px;
+    }
+
+    .stat-value {
+      font-size: 13px;
+      font-weight: bold;
+      overflow-wrap: anywhere;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 22px 0;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 9px;
+      padding: 12px 17px;
+      background: var(--orange);
+      color: #171717;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      filter: brightness(1.1);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .btn-secondary {
+      background: #202a40;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    /* ===== PANEL CANDLESTICK ===== */
+
+    .chart-panel {
+      margin-top: 28px;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--panel);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.25);
+      backdrop-filter: blur(12px);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .chart-header h2 {
+      font-size: 21px;
+      margin-bottom: 8px;
+    }
+
+    .chart-header p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .chart-select {
+      padding: 11px 14px;
+      color: var(--text);
+      background: #171f31;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      outline: none;
+    }
+
+    .timeframes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .time-btn {
+      padding: 9px 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #c9d3e7;
+      background: #182034;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .time-btn.active {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #111;
+      font-weight: bold;
+    }
+
+    #stockChart {
+      width: 100%;
+      height: 430px;
+      min-width: 0;
+    }
+
+    .chart-info {
+      margin-top: 13px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+
+    .message {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #ffd18a;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+
+    .footer {
+      margin-top: 28px;
+      padding: 20px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 700px) {
+      .navbar {
+        padding: 15px 5%;
+      }
+
+      .brand {
+        font-size: 16px;
+      }
+
+      .container {
+        margin: 28px auto;
+      }
+
+      .stock-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stock-card, .chart-panel {
+        padding: 18px;
+      }
+
+      #stockChart {
+        height: 350px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ================= HEADER ================= -->
+
+  <nav class="navbar">
+    <div class="brand">⚡ BORUTO <span>STOCK</span></div>
+    <div class="market-status">● STOCK MARKET</div>
+  </nav>
 
   <main class="container">
+
+    <!-- ================= JUDUL ================= -->
+
     <section class="hero">
-      <p class="eyebrow">MY INVESTMENT DASHBOARD</p>
+      <div class="eyebrow">MY INVESTMENT DASHBOARD</div>
+
       <h1>SHINOBI <span>INVESTOR</span></h1>
-      <p>Pantau perjalanan saham PLTR dan MU dalam satu dashboard.</p>
+
+      <p>
+        Pantau perjalanan saham PLTR dan MU dalam satu dashboard.
+        Data harga diambil dari Finnhub.
+      </p>
     </section>
 
-    <div class="market-info">
-      <span>🇺🇸 NASDAQ STOCKS</span>
-      <span id="updateTime">Menunggu data...</span>
+    <div class="section-label">
+      <span>US NASDAQ STOCKS</span>
+      <span id="priceUpdated">Pembaruan: menunggu data...</span>
     </div>
 
+    <!-- ================= KARTU SAHAM ================= -->
+
     <section class="stock-grid">
+
       <article class="stock-card">
-        <div class="stock-top">
-          <div class="stock-icon">P</div>
+        <div class="stock-title">
+          <div class="ticker-icon">P</div>
           <div>
             <h2>PLTR</h2>
             <p>Palantir Technologies</p>
           </div>
         </div>
-        <p class="label">HARGA SAAT INI (USD)</p>
-        <h1 id="price-PLTR">Memuat...</h1>
-        <p id="change-PLTR" class="change">Menunggu data...</p>
-        <div class="details">
-          <div><span>Harga pembukaan</span><b id="open-PLTR">-</b></div>
-          <div><span>Harga tertinggi</span><b id="high-PLTR">-</b></div>
-          <div><span>Harga terendah</span><b id="low-PLTR">-</b></div>
-          <div><span>Penutupan sebelumnya</span><b id="prev-PLTR">-</b></div>
+
+        <div class="price-label">HARGA SAAT INI (USD)</div>
+        <div class="price" id="price-PLTR">Memuat...</div>
+        <div class="change neutral" id="change-PLTR">Menunggu data...</div>
+
+        <div class="stats">
+          <div>
+            <div class="stat-label">Harga pembukaan</div>
+            <div class="stat-value" id="open-PLTR">—</div>
+          </div>
+          <div>
+            <div class="stat-label">Harga tertinggi</div>
+            <div class="stat-value" id="high-PLTR">—</div>
+          </div>
+          <div>
+            <div class="stat-label">Harga terendah</div>
+            <div class="stat-value" id="low-PLTR">—</div>
+          </div>
+          <div>
+            <div class="stat-label">Penutupan sebelumnya</div>
+            <div class="stat-value" id="previous-PLTR">—</div>
+          </div>
         </div>
       </article>
 
       <article class="stock-card">
-        <div class="stock-top">
-          <div class="stock-icon blue">M</div>
+        <div class="stock-title">
+          <div class="ticker-icon mu">M</div>
           <div>
             <h2>MU</h2>
             <p>Micron Technology</p>
           </div>
         </div>
-        <p class="label">HARGA SAAT INI (USD)</p>
-        <h1 id="price-MU">Memuat...</h1>
-        <p id="change-MU" class="change">Menunggu data...</p>
-        <div class="details">
-          <div><span>Harga pembukaan</span><b id="open-MU">-</b></div>
-          <div><span>Harga tertinggi</span><b id="high-MU">-</b></div>
-          <div><span>Harga terendah</span><b id="low-MU">-</b></div>
-          <div><span>Penutupan sebelumnya</span><b id="prev-MU">-</b></div>
+
+        <div class="price-label">HARGA SAAT INI (USD)</div>
+        <div class="price" id="price-MU">Memuat...</div>
+        <div class="change neutral" id="change-MU">Menunggu data...</div>
+
+        <div class="stats">
+          <div>
+            <div class="stat-label">Harga pembukaan</div>
+            <div class="stat-value" id="open-MU">—</div>
+          </div>
+          <div>
+            <div class="stat-label">Harga tertinggi</div>
+            <div class="stat-value" id="high-MU">—</div>
+          </div>
+          <div>
+            <div class="stat-label">Harga terendah</div>
+            <div class="stat-value" id="low-MU">—</div>
+          </div>
+          <div>
+            <div class="stat-label">Penutupan sebelumnya</div>
+            <div class="stat-value" id="previous-MU">—</div>
+          </div>
         </div>
       </article>
+
     </section>
 
-    <button id="refreshButton" onclick="loadStocks()">
-      ↻ PERBARUI HARGA
-    </button>
+    <!-- ================= TOMBOL HARGA ================= -->
 
-    <p class="disclaimer">
-      Data harga berasal dari Finnhub. Harga dapat tertunda dan tidak selalu
-      berubah saat pasar tutup. Bukan saran investasi.
-    </p>
+    <div class="toolbar">
+      <button class="btn" id="refreshButton">
+        ↻ PERBARUI HARGA
+      </button>
+    </div>
+
+    <div id="priceMessage" class="message"></div>
+
+    <!-- ================= CANDLESTICK CHART ================= -->
+
+    <section class="chart-panel">
+      <div class="chart-header">
+        <div>
+          <h2>📊 CANDLESTICK CHART</h2>
+          <p>
+            Grafik pergerakan harga saham.<br>
+            Hijau = naik · Merah = turun
+          </p>
+        </div>
+
+        <select class="chart-select" id="chartSymbol">
+          <option value="PLTR">PLTR — Palantir</option>
+          <option value="MU">MU — Micron</option>
+        </select>
+      </div>
+
+      <div class="timeframes">
+        <button class="time-btn" data-resolution="5">5 Menit</button>
+        <button class="time-btn" data-resolution="15">15 Menit</button>
+        <button class="time-btn" data-resolution="60">1 Jam</button>
+        <button class="time-btn active" data-resolution="D">1 Hari</button>
+        <button class="time-btn" data-resolution="W">1 Minggu</button>
+      </div>
+
+      <div id="stockChart"></div>
+
+      <div class="chart-info" id="chartInfo">
+        Grafik akan ditampilkan setelah data berhasil diambil.
+      </div>
+
+      <div class="message" id="chartMessage"></div>
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer class="footer">
+      BORUTO STOCK · SHINOBI INVESTOR<br>
+      Data disediakan oleh Finnhub. Harga dapat tertunda sesuai akses API.
+      Bukan merupakan rekomendasi investasi.
+    </footer>
+
   </main>
 
-  <script src="script.js"></script>
+  <!-- =============== LIBRARY CHART =============== -->
+
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
+  <!-- ================= JAVASCRIPT ================= -->
+
+  <script>
+    // ==================================================
+    // 1. MASUKKAN API KEY FINNHUB KAMU DI SINI
+    // ==================================================
+
+    const API_KEY = "MASUKKAN_API_KEY_FINNHUB_KAMU";
+
+    // Pengaturan pembaruan otomatis: 60 detik
+    const UPDATE_INTERVAL = 60 * 1000;
+
+    // ==================================================
+    // 2. FUNGSI FORMAT HARGA
+    // ==================================================
+
+    function formatUSD(value) {
+      if (typeof value !== "number" || !Number.isFinite(value)) {
+        return "—";
+      }
+
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value);
+    }
+
+    function validApiKey() {
+      return API_KEY &&
+        API_KEY !== "MASUKKAN_API_KEY_FINNHUB_KAMU";
+    }
+
+    // ==================================================
+    // 3. MENGAMBIL HARGA SAHAM
+    // ==================================================
+
+    async function fetchQuote(symbol) {
+      const url = new URL("https://finnhub.io/api/v1/quote");
+
+      url.searchParams.set("symbol", symbol);
+      url.searchParams.set("token", API_KEY);
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(
+          symbol + ": permintaan gagal (" + response.status + ")."
+        );
+      }
+
+      const data = await response.json();
+
+      if (typeof data.c !== "number" || data.c <= 0) {
+        throw new Error(
+          symbol + ": harga belum tersedia dari Finnhub."
+        );
+      }
+
+      return data;
+    }
+
+    function setText(id, value) {
+      document.getElementById(id).textContent = value;
+    }
+
+    function showQuote(symbol, data) {
+      setText("price-" + symbol, formatUSD(data.c));
+      setText("open-" + symbol, formatUSD(data.o));
+      setText("high-" + symbol, formatUSD(data.h));
+      setText("low-" + symbol, formatUSD(data.l));
+      setText("previous-" + symbol, formatUSD(data.pc));
+
+      const changeElement = document.getElementById(
+        "change-" + symbol
+      );
+
+      const change = Number(data.d);
+      const percent = Number(data.dp);
+
+      const sign = change > 0 ? "+" : "";
+      const percentSign = percent > 0 ? "+" : "";
+
+      changeElement.textContent =
+        sign + formatUSD(change) +
+        " (" + percentSign + percent.toFixed(2) +
+        "%) dibanding penutupan sebelumnya";
+
+      changeElement.className = "change " +
+        (change > 0 ? "positive" :
+        change < 0 ? "negative" : "neutral");
+    }
+
+    // ==================================================
+    // 4. PERBARUI KARTU SAHAM
+    // ==================================================
+
+    let priceUpdating = false;
+
+    async function updatePrices() {
+      if (priceUpdating) return;
+
+      if (!validApiKey()) {
+        setText(
+          "priceMessage",
+          "Masukkan API Key Finnhub di dalam kode terlebih dahulu."
+        );
+        return;
+      }
+
+      priceUpdating = true;
+
+      const button = document.getElementById("refreshButton");
+      button.disabled = true;
+      button.textContent = "MEMPERBARUI...";
+
+      const results = await Promise.allSettled([
+        fetchQuote("PLTR"),
+        fetchQuote("MU")
+      ]);
+
+      const errors = [];
+
+      results.forEach((result, index) => {
+        const symbol = index === 0 ? "PLTR" : "MU";
+
+        if (result.status === "fulfilled") {
+          showQuote(symbol, result.value);
+        } else {
+          errors.push(result.reason.message);
+        }
+      });
+
+      setText(
+        "priceUpdated",
+        "Pembaruan: " + new Date().toLocaleTimeString("id-ID")
+      );
+
+      setText("priceMessage", errors.join(" | "));
+
+      button.disabled = false;
+      button.textContent = "↻ PERBARUI HARGA";
+      priceUpdating = false;
+    }
+
+    document.getElementById("refreshButton").addEventListener(
+      "click", updatePrices
+    );
+
+    // ==================================================
+    // 5. MEMBUAT GRAFIK CANDLESTICK
+    // ==================================================
+
+    const chartElement = document.getElementById("stockChart");
+    const chartMessage = document.getElementById("chartMessage");
+    const chartInfo = document.getElementById("chartInfo");
+
+    let stockChart = null;
+    let candleSeries = null;
+    let currentResolution = "D";
+    let chartUpdating = false;
+    let chartRequestId = 0;
+
+    function initializeChart() {
+      if (typeof LightweightCharts === "undefined") {
+        chartMessage.textContent =
+          "Library grafik gagal dimuat. Periksa koneksi internet.";
+        return;
+      }
+
+      stockChart = LightweightCharts.createChart(chartElement, {
+        width: chartElement.clientWidth,
+        height: window.innerWidth <= 700 ? 350 : 430,
+
+        layout: {
+          background: { color: "#0f1422" },
+          textColor: "#c2cde0"
+        },
+
+        grid: {
+          vertLines: { color: "#222b3e" },
+          horzLines: { color: "#222b3e" }
+        },
+
+        rightPriceScale: {
+          borderColor: "#30384a"
+        },
+
+        timeScale: {
+          borderColor: "#30384a",
+          timeVisible: true,
+          secondsVisible: false
+        },
+
+        crosshair: {
+          mode: LightweightCharts.CrosshairMode.Normal
+        },
+
+        localization: {
+          priceFormatter: price => "$" + price.toFixed(2)
+        }
+      });
+
+      candleSeries = stockChart.addSeries(
+        LightweightCharts.CandlestickSeries,
+        {
+          upColor: "#22c987",
+          downColor: "#ff5964",
+          borderUpColor: "#22c987",
+          borderDownColor: "#ff5964",
+          wickUpColor: "#22c987",
+          wickDownColor: "#ff5964"
+        }
+      );
+
+      const resizeObserver = new ResizeObserver(() => {
+        if (stockChart) {
+          stockChart.applyOptions({
+            width: chartElement.clientWidth
+          });
+        }
+      });
+
+      resizeObserver.observe(chartElement);
+    }
+
+    // ==================================================
+    // 6. MEMINTA DATA OHLC DARI FINNHUB
+    // ==================================================
+
+    async function loadCandles() {
+      const requestId = ++chartRequestId;
+
+      if (!validApiKey()) {
+        chartMessage.textContent =
+          "Masukkan API Key Finnhub terlebih dahulu.";
+        return;
+      }
+
+      if (!candleSeries) {
+        chartMessage.textContent =
+          "Grafik belum siap. Periksa koneksi internet.";
+        return;
+      }
+
+      if (chartUpdating) {
+        // Request baru akan dijalankan oleh interval berikutnya.
+        return;
+      }
+
+      chartUpdating = true;
+
+      const symbol = document.getElementById("chartSymbol").value;
+      chartMessage.textContent = "Memuat grafik " + symbol + "...";
+
+      try {
+        const to = Math.floor(Date.now() / 1000);
+
+        // Rentang data grafik
+        let days;
+
+        if (currentResolution === "W") {
+          days = 365 * 3;
+        } else if (currentResolution === "D") {
+          days = 365;
+        } else {
+          days = 7;
+        }
+
+        const from = to - days * 24 * 60 * 60;
+
+        const url = new URL(
+          "https://finnhub.io/api/v1/stock/candle"
+        );
+
+        url.searchParams.set("symbol", symbol);
+        url.searchParams.set("resolution", currentResolution);
+        url.searchParams.set("from", from);
+        url.searchParams.set("to", to);
+        url.searchParams.set("token", API_KEY);
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(
+            "Finnhub menolak permintaan (" + response.status + ")."
+          );
+        }
+
+        const data = await response.json();
+
+        if (data.s !== "ok" || !data.t || data.t.length === 0) {
+          throw new Error(
+            "Data candle tidak tersedia untuk timeframe ini."
+          );
+        }
+
+        if (requestId !== chartRequestId) return;
+
+        const candles = data.t.map((timestamp, i) => ({
+          time: timestamp,
+          open: data.o[i],
+          high: data.h[i],
+          low: data.l[i],
+          close: data.c[i]
+        }));
+
+        candleSeries.setData(candles);
+        stockChart.timeScale().fitContent();
+
+        chartInfo.textContent =
+          symbol + " · " + candles.length +
+          " candle · Pemeriksaan terakhir: " +
+          new Date().toLocaleTimeString("id-ID");
+
+        chartMessage.textContent = "";
+      } catch (error) {
+        if (requestId === chartRequestId) {
+          chartMessage.textContent = error.message;
+        }
+      } finally {
+        chartUpdating = false;
+      }
+    }
+
+    // ==================================================
+    // 7. PILIH SAHAM DAN TIMEFRAME
+    // ==================================================
+
+    document.getElementById("chartSymbol").addEventListener(
+      "change", loadCandles
+    );
+
+    document.querySelectorAll(".time-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        currentResolution = button.dataset.resolution;
+
+        document.querySelectorAll(".time-btn").forEach(item => {
+          item.classList.toggle("active", item === button);
+        });
+
+        loadCandles();
+      });
+    });
+
+    // ==================================================
+    // 8. JALANKAN SEMUA FITUR
+    // ==================================================
+
+    initializeChart();
+    updatePrices();
+    loadCandles();
+
+    // Pembaruan otomatis setiap 60 detik.
+    setInterval(updatePrices, UPDATE_INTERVAL);
+    setInterval(loadCandles, UPDATE_INTERVAL);
+  </script>
 </body>
 </html>
