@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boruto Stock Portfolio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <header class="navbar">
+    <h2>⚡ BORUTO <span>STOCK</span></h2>
+    <div class="status">● STOCK MARKET</div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <p class="eyebrow">MY INVESTMENT DASHBOARD</p>
+      <h1>SHINOBI <span>INVESTOR</span></h1>
+      <p>Pantau perjalanan saham PLTR dan MU dalam satu dashboard.</p>
+    </section>
+
+    <div class="market-info">
+      <span>🇺🇸 NASDAQ STOCKS</span>
+      <span id="updateTime">Menunggu data...</span>
+    </div>
+
+    <section class="stock-grid">
+      <article class="stock-card">
+        <div class="stock-top">
+          <div class="stock-icon">P</div>
+          <div>
+            <h2>PLTR</h2>
+            <p>Palantir Technologies</p>
+          </div>
+        </div>
+        <p class="label">HARGA SAAT INI (USD)</p>
+        <h1 id="price-PLTR">Memuat...</h1>
+        <p id="change-PLTR" class="change">Menunggu data...</p>
+        <div class="details">
+          <div><span>Harga pembukaan</span><b id="open-PLTR">-</b></div>
+          <div><span>Harga tertinggi</span><b id="high-PLTR">-</b></div>
+          <div><span>Harga terendah</span><b id="low-PLTR">-</b></div>
+          <div><span>Penutupan sebelumnya</span><b id="prev-PLTR">-</b></div>
+        </div>
+      </article>
+
+      <article class="stock-card">
+        <div class="stock-top">
+          <div class="stock-icon blue">M</div>
+          <div>
+            <h2>MU</h2>
+            <p>Micron Technology</p>
+          </div>
+        </div>
+        <p class="label">HARGA SAAT INI (USD)</p>
+        <h1 id="price-MU">Memuat...</h1>
+        <p id="change-MU" class="change">Menunggu data...</p>
+        <div class="details">
+          <div><span>Harga pembukaan</span><b id="open-MU">-</b></div>
+          <div><span>Harga tertinggi</span><b id="high-MU">-</b></div>
+          <div><span>Harga terendah</span><b id="low-MU">-</b></div>
+          <div><span>Penutupan sebelumnya</span><b id="prev-MU">-</b></div>
+        </div>
+      </article>
+    </section>
+
+    <button id="refreshButton" onclick="loadStocks()">
+      ↻ PERBARUI HARGA
+    </button>
+
+    <p class="disclaimer">
+      Data harga berasal dari Finnhub. Harga dapat tertunda dan tidak selalu
+      berubah saat pasar tutup. Bukan saran investasi.
+    </p>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
