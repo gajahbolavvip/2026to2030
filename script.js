@@ -1,5 +1,5 @@
 
-const API_KEY = "MASUKKAN_API_KEY_KAMU";
+const API_KEY = "dbe9ofpr01qm2ls014ggdbe9ofpr01qm2ls014h0";
 
 const symbols = ["PLTR", "MU"];
 
